@@ -3,6 +3,8 @@ const cvs = document.getElementById('flappy-bird');
 const ctx = cvs.getContext('2d');
 // GAME VARS AND CONST
 let frames = 0;
+const DEGREE = Math.PI / 180;
+
 // LOAD SPRITE IMAGE
 const sprite = new Image();
 sprite.src = './img/sprite.png';
@@ -72,6 +74,7 @@ const fg = {
   h: 112,
   x: 0,
   y: cvs.height - 112,
+  dX: 2,
 
   draw: function () {
     ctx.drawImage(
@@ -97,6 +100,12 @@ const fg = {
       this.h
     );
   },
+
+  update: function () {
+    if (state.current == state.game) {
+      this.x = (this.x - this.dX) % (this.w / 2);
+    }
+  },
 };
 // BIRD
 const bird = {
@@ -116,9 +125,14 @@ const bird = {
   gravity: 0.25,
   jump: 4.6,
   speed: 0,
+  rotation: 0,
 
   draw: function () {
     let bird = this.animation[this.frame];
+
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
 
     ctx.drawImage(
       sprite,
@@ -126,18 +140,20 @@ const bird = {
       bird.sY,
       this.w,
       this.h,
-      this.x - this.w / 2,
-      this.y - this.h / 2,
+      -this.w / 2,
+      -this.h / 2,
       this.w,
       this.h
     );
+
+    ctx.restore();
   },
 
   flap: function () {
-    this.speed = - this.jump;
+    this.speed = -this.jump;
   },
 
-  update: function() {
+  update: function () {
     // IF THE GAME STATE IS GET READY STATE, THE BIRD MUST FLAP SLOWLY
     this.period = state.current === state.getReady ? 10 : 5;
     // INCREASE THE FRAME BY 1, EACH PERIOD
@@ -149,18 +165,27 @@ const bird = {
       // RESET BIRD's POSITION
       this.y = 150;
       this.speed = 0;
+      this.rotation = 0 * DEGREE;
     } else {
       this.speed += this.gravity;
       this.y += this.speed;
 
-      if (this.y + this.h/2 >= cvs.height - fg.h) {
-        this.y = cvs.height - fg.h - this.h/2;
+      if (this.y + this.h / 2 >= cvs.height - fg.h) {
+        this.y = cvs.height - fg.h - this.h / 2;
         if (state.current == state.game) {
           state.current = state.over;
         }
       }
+
+      // IF THE SPEED IS GREATER THAN THE JUMP MEANS THE BIRD IS FALLING DOWN
+      if (this.speed >= this.jump) {
+        this.rotation = 45 * DEGREE;
+        this.frame = 1;
+      } else {
+        this.rotation = -25 * DEGREE;
+      }
     }
-  }
+  },
 };
 
 // GET READY MESSAGE
@@ -219,7 +244,7 @@ const gameOver = {
  * MAIN FUNCTION
  */
 
- // DRAW
+// DRAW
 function draw() {
   ctx.fillStyle = '#70c5ce';
   ctx.fillRect(0, 0, cvs.width, cvs.height);
@@ -233,6 +258,7 @@ function draw() {
 // UPDATE
 function update() {
   bird.update();
+  fg.update();
 }
 // LOOP
 function loop() {
