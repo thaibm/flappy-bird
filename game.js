@@ -240,6 +240,76 @@ const gameOver = {
   },
 };
 
+// PIPES
+const pipes = {
+  positions: [],
+  top: {
+    sX: 553,
+    sY: 0
+  },
+  bottom: {
+    sX: 502,
+    sY: 0
+  },
+
+  w: 53,
+  h: 400,
+  gap: 85,
+  maxYPos: -150,
+  dX: 2,
+
+  draw: function(){
+    for(const p of this.positions) {
+      let topYPos = p.y;
+      let bottomYPos = p.y + this.h + this.gap;
+
+      // TOP PIPE
+      ctx.drawImage(
+        sprite,
+        this.top.sX,
+        this.top.sY,
+        this.w,
+        this.h,
+        p.x,
+        topYPos,
+        this.w,
+        this.h
+      );
+      // BOTTOM PIPE
+      ctx.drawImage(
+        sprite,
+        this.bottom.sX,
+        this.bottom.sY,
+        this.w,
+        this.h,
+        p.x,
+        bottomYPos,
+        this.w,
+        this.h
+      );
+    }
+  },
+
+  update: function() {
+    if(state.current != state.game) return;
+
+    if(frames % 100 == 0) {
+      this.positions.push({
+        x: cvs.width,
+        y: this.maxYPos * (Math.random() + 1)
+      })
+    }
+
+    for (const p of this.positions) {
+      p.x -= this.dX;
+
+      if (p.x + this.w <= 0) {
+        this.positions.shift();
+      }
+    }
+  },
+}
+
 /**
  * MAIN FUNCTION
  */
@@ -250,6 +320,7 @@ function draw() {
   ctx.fillRect(0, 0, cvs.width, cvs.height);
 
   bg.draw();
+  pipes.draw();
   fg.draw();
   bird.draw();
   getReady.draw();
@@ -259,6 +330,7 @@ function draw() {
 function update() {
   bird.update();
   fg.update();
+  pipes.update();
 }
 // LOOP
 function loop() {
