@@ -127,6 +127,8 @@ const bird = {
   speed: 0,
   rotation: 0,
 
+  radius: 12,
+
   draw: function () {
     let bird = this.animation[this.frame];
 
@@ -245,11 +247,11 @@ const pipes = {
   positions: [],
   top: {
     sX: 553,
-    sY: 0
+    sY: 0,
   },
   bottom: {
     sX: 502,
-    sY: 0
+    sY: 0,
   },
 
   w: 53,
@@ -258,8 +260,8 @@ const pipes = {
   maxYPos: -150,
   dX: 2,
 
-  draw: function(){
-    for(const p of this.positions) {
+  draw: function () {
+    for (const p of this.positions) {
       let topYPos = p.y;
       let bottomYPos = p.y + this.h + this.gap;
 
@@ -290,25 +292,49 @@ const pipes = {
     }
   },
 
-  update: function() {
-    if(state.current != state.game) return;
+  update: function () {
+    if (state.current != state.game) return;
 
-    if(frames % 100 == 0) {
+    if (frames % 100 == 0) {
       this.positions.push({
         x: cvs.width,
-        y: this.maxYPos * (Math.random() + 1)
-      })
+        y: this.maxYPos * (Math.random() + 1),
+      });
     }
 
     for (const p of this.positions) {
+      let bottomPipeYPos = p.y + this.h + this.gap;
+      // COLLISION DETECTION
+      // TOP PIPE
+      if (
+        bird.x + bird.radius > p.x &&
+        bird.x - bird.radius < p.x + this.w &&
+        bird.y + bird.radius > p.y &&
+        bird.y - bird.radius < p.y + this.h
+      ) {
+        state.current = state.over;
+      }
+
+      //BOTTOM PIPE
+      if (
+        bird.x + bird.radius > p.x &&
+        bird.x - bird.radius < p.x + this.w &&
+        bird.y + bird.radius > bottomPipeYPos &&
+        bird.y - bird.radius < bottomPipeYPos + this.h
+      ) {
+        state.current = state.over;
+      }
+
+      // MOVE THE PIPE TO THE LEFT
       p.x -= this.dX;
 
       if (p.x + this.w <= 0) {
+        // IF THE PIPE GO BEYOND CANVAS, WE DELETE THEM FROM ARRAY
         this.positions.shift();
       }
     }
   },
-}
+};
 
 /**
  * MAIN FUNCTION
