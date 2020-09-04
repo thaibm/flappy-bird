@@ -28,6 +28,9 @@ cvs.addEventListener('click', function (event) {
       break;
     case state.over:
       state.current = state.getReady;
+      bird.reset();
+      score.reset();
+      pipes.reset();
       break;
   }
 });
@@ -166,7 +169,6 @@ const bird = {
     if (state.current === state.getReady) {
       // RESET BIRD's POSITION
       this.y = 150;
-      this.speed = 0;
       this.rotation = 0 * DEGREE;
     } else {
       this.speed += this.gravity;
@@ -188,6 +190,10 @@ const bird = {
       }
     }
   },
+
+  reset: function() {
+    this.speed = 0;
+  }
 };
 
 // GET READY MESSAGE
@@ -331,9 +337,45 @@ const pipes = {
       if (p.x + this.w <= 0) {
         // IF THE PIPE GO BEYOND CANVAS, WE DELETE THEM FROM ARRAY
         this.positions.shift();
+        score.value += 1;
+  
+        score.best = Math.max(score.value, score.best);
+        localStorage.setItem('bestScore', score.best);
       }
     }
   },
+
+  reset: function() {
+    this.positions = [];
+  }
+};
+
+// SCORE
+const score = {
+  best: Number(localStorage.getItem('bestScore')) || 0,
+  value: 0,
+  draw: function () {
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#000';
+
+    if (state.current == state.game) {
+      ctx.lineWidth = 2;
+      ctx.font = '35px Teko';
+      ctx.fillText(this.value, cvs.width / 2, 50);
+      ctx.strokeText(this.value, cvs.width / 2, 50);
+    } else if (state.current == state.over) {
+      ctx.font = '25px Teko';
+      // SCORE VALUE
+      ctx.fillText(this.value, 225, 186);
+      ctx.strokeText(this.value, 225, 186);
+      // BEST SCORE
+      ctx.fillText(this.best, 225, 228);
+      ctx.strokeText(this.best, 225, 228);
+    }
+  },
+  reset: function() {
+    this.value = 0;
+  }
 };
 
 /**
@@ -351,6 +393,7 @@ function draw() {
   bird.draw();
   getReady.draw();
   gameOver.draw();
+  score.draw();
 }
 // UPDATE
 function update() {
