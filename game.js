@@ -27,13 +27,30 @@ cvs.addEventListener('click', function (event) {
       bird.flap();
       break;
     case state.over:
-      state.current = state.getReady;
-      bird.reset();
-      score.reset();
-      pipes.reset();
+      let rect = cvs.getBoundingClientRect();
+      let clickX = event.clientX - rect.left;
+      let clickY = event.clientY - rect.top;
+      if (
+        clickX >= startBtn.x &&
+        clickX <= startBtn.x + startBtn.w &&
+        clickY >= startBtn.y &&
+        clickY <= startBtn.y + startBtn.h
+      ) {
+        state.current = state.getReady;
+        bird.reset();
+        score.reset();
+        pipes.reset();
+      }
       break;
   }
 });
+// START BUTTON
+const startBtn = {
+  x: 120,
+  y: 263,
+  w: 83,
+  h: 29,
+};
 
 // BACKGROUND
 const bg = {
@@ -191,9 +208,9 @@ const bird = {
     }
   },
 
-  reset: function() {
+  reset: function () {
     this.speed = 0;
-  }
+  },
 };
 
 // GET READY MESSAGE
@@ -338,16 +355,16 @@ const pipes = {
         // IF THE PIPE GO BEYOND CANVAS, WE DELETE THEM FROM ARRAY
         this.positions.shift();
         score.value += 1;
-  
+
         score.best = Math.max(score.value, score.best);
         localStorage.setItem('bestScore', score.best);
       }
     }
   },
 
-  reset: function() {
+  reset: function () {
     this.positions = [];
-  }
+  },
 };
 
 // SCORE
@@ -373,9 +390,9 @@ const score = {
       ctx.strokeText(this.best, 225, 228);
     }
   },
-  reset: function() {
+  reset: function () {
     this.value = 0;
-  }
+  },
 };
 
 /**
